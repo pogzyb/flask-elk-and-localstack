@@ -1,0 +1,27 @@
+{
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "name",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "timestamp",
+      "AttributeType": "S"
+    }
+  ],
+  "ProvisionedThroughput": {
+    "WriteCapacityUnits": 5,
+    "ReadCapacityUnits": 5
+  },
+  "TableName": "Wikis",
+  "KeySchema": [
+    {
+      "KeyType": "HASH",
+      "AttributeName": "name"
+    },
+    {
+      "KeyType": "RANGE",
+      "AttributeName": "timestamp"
+    }
+  ]
+}
