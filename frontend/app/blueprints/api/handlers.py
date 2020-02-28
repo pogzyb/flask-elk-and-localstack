@@ -3,7 +3,7 @@ import logging
 from flask import jsonify, request
 
 from app.blueprints.api import api
-from app.utils.ddb import (
+from app.aws_utils.ddb import (
     get_all_records,
     get_single_record,
     format_query_result,

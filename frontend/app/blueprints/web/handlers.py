@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from flask_login import current_user
 from flask import (
     Blueprint,
     jsonify,
@@ -10,8 +11,8 @@ from flask import (
 )
 
 from app.blueprints.web import web
-from app.utils.sqs import send_to_queue
-from app.utils.ddb import (
+from app.aws_utils.sqs import send_to_queue
+from app.aws_utils.ddb import (
     get_all_records,
     get_single_record,
     format_query_result,
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 @web.route('/', methods=['GET'])
 def index():
-    return render_template('web/index.html')
+    return render_template('web/index.html', current_user=current_user)
 
 
 @web.route('/scrape', methods=['POST'])
