@@ -12,14 +12,14 @@ class RegisterUserForm(FlaskForm):
     password_repeat = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
-    def validate_username_exists(self, username: str):
-        exists = User.query().filter_by(username=username).first()
-        if exists:
-            raise ValidationError('That username already exists!')
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError('Sorry - that username is taken!')
 
-    def validate_email_exists(self, email: str):
-        exists = User.query().filter_by(email=email).first()
-        if exists:
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None:
             raise ValidationError('That email address is already in use!')
 
 
@@ -29,6 +29,12 @@ class LoginUserForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-class ResetPasswordForm(FlaskForm):
+class StartResetPasswordForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email('Please enter a valid email address')])
-    submit = SubmitField('Login')
+    submit = SubmitField('Send Password Reset Instructions')
+
+
+class CompleteResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired()])
+    password_repeat = PasswordField('Repeat New Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Update Password')
