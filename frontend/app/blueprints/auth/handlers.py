@@ -77,14 +77,14 @@ def reset_password():
         if form.validate_on_submit():
             user = User.query.filter_by(email=form.email.data).first()
             if user:
-                pass
-                # me.send_password_reset_email(user.email)
+                token = user.get_reset_password_token()
+                me.send_password_reset_email(user.email, token)
             flash('Sending instructions to that email address!', 'success')
             return redirect(url_for('auth.reset_password'))
     return render_template('auth/reset_start.html', form=form)
 
 
-@auth.route('reset_password/<string:token>', methods=['GET', 'POST'])
+@auth.route('/reset_password/<string:token>', methods=['GET', 'POST'])
 def reset_password_with_token(token):
     if current_user.is_authenticated:
         return redirect(url_for('web.index'))
@@ -96,6 +96,6 @@ def reset_password_with_token(token):
     if form.validate_on_submit():
         user.set_password_hash(form.password.data)
         db.session.commit()
-        flash('Your password was successfully updated!')
+        flash('Your password was successfully updated!', 'success')
         return redirect(url_for('auth.login'))
-    return render_template('reset_complete.html', form=form)
+    return render_template('auth/reset_complete.html', form=form)
