@@ -1,39 +1,47 @@
 import logging
-from concurrent.futures import ThreadPoolExecutor
+import os
+import threading
 from queue import Queue
 
-from flask import Flask
+# from flask import Flask
 
-from app.utils.ses import send_mail
+from app.aws_utils.ses import send_email
 
 
 logger = logging.getLogger(__name__)
 
 
+# TODO: define html templates for emails
+# - confirm account
+# - reset password
+class ResetPasswordEmail:
+
+    Subject = "Hello"
+    Body = """Hi this is an email"""
+
+
+# TODO: job that checks number of threads in case worker dies or maybe just sqs consumer with go?
 class MailExecutor:
     """Non-blocking email manager"""
 
-    def __init__(self, app: Flask = None, mail: Mail = None):
+    def __init__(self):
         self._queue = Queue()
-        self._executor = ThreadPoolExecutor(max_workers=2)
-        self._app = app
-        self._mail = mail
+        self._num_workers = int(os.getenv('MAIL_WORKERS'))
 
-    def init_app(self, app: Flask, mail: Mail):
-        self._app = app
-        self._mail = mail
+    def init_app(self):
         self._launch_workers()
-        self._queue.join()
 
     def _launch_workers(self):
-        for i in range(2):
+        for i in range(self._num_workers):
             ms = MailSender(name=f'mail-worker-{i+1}')
-            self._executor.submit(ms.listen_for_mail, args=(self._queue, self._app, self._mail))
+            worker = threading.Thread(target=ms.listen_for_mail, args=(self._queue,))
+            worker.setDaemon(True)
+            worker.start()
             logger.info(f'Launched mail-worker-{i+1}')
 
     def send_password_reset_email(self, email: str) -> None:
         """sends email address to queue"""
-        self._queue.put(item=email, block=True, timeout=10)
+        self._queue.put(item=email, block=False)
         logger.info(f'Sent {email} to email queue')
 
 
@@ -43,17 +51,20 @@ class MailSender:
     def __init__(self, name):
         self.name = name
 
-    def listen_for_mail(self, email_queue: Queue, app: Flask, mail: Mail):
-        logger.info(f'{self.name} is listening!')
+    def listen_for_mail(self, q: Queue):
         while True:
-            email = email_queue.get()
+            logger.debug(f'{self.name} is listening')
+            email = q.get(block=True)
             if email:
-                with app.app_context():
-                    msg = Message("A message!", sender="joe ", recipients=["joebarzanek@gmail.com"])
-                    msg.body = "Hey!!"
-                    msg.html = "<h2>HI</h2>"
-                    mail.send(msg)
-                email_queue.task_done()
+                send_email(
+                    subject='Hello',
+                    body='Hey you',
+                    recipient=email,
+                    sender='joebarzanek@gmail.com',
+                    html='<h5>Whats up</h5>'
+                )
+                logger.debug(f'{self.name} sent email to "{email}"')
+                q.task_done()
 
 
 me = MailExecutor()
