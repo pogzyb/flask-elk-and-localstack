@@ -6,24 +6,10 @@
     <div class="row d-flex justify-content-center">
         <div class="col-md-6">
         <div class="card bg-light box-shadow">
-            <div class="card-header"><h5><i class="fas fa-user-plus"></i> Create Account</h5></div>
+            <div class="card-header"><h5><i class="fas fa-paper-plane"></i> Reset Password</h5></div>
             <div class="card-body">
                 <form action="" method="post">
                     {{ form.hidden_tag() }}
-                    <div class="form-group">
-                        <i class="fas fa-user-tag"></i> {{ form.username.label }}
-                        {{ form.username(class_='form-control') }}
-                        {% for error in form.username.errors %}
-                        <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-group">
-                        <i class="fas fa-at"></i> {{ form.email.label }}
-                        {{ form.email(class_='form-control', size=64) }}
-                        {% for error in form.email.errors %}
-                        <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
                     <div class="form-group">
                         <i class="fas fa-key"></i> {{ form.password.label }}
                         {{ form.password(class_='form-control') }}
