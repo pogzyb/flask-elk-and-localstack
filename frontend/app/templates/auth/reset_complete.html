@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Begin page content -->
+<main role="main" class="container">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-6">
+        <div class="card bg-light box-shadow">
+            <div class="card-header"><h5><i class="fas fa-paper-plane"></i> Reset Password</h5></div>
+            <div class="card-body">
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        <i class="fas fa-key"></i> {{ form.password.label }}
+                        {{ form.password(class_='form-control') }}
+                        {% for error in form.password.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-key"></i> {{ form.password_repeat.label }}
+                        {{ form.password_repeat(class_='form-control') }}
+                        {% for error in form.password_repeat.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <hr>
+                    {{ form.submit(class='btn btn-lg btn-block btn-primary') }}
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+</main>
+<!-- Begin footer -->
+{% include "footer.html" %}
+{% endblock %}

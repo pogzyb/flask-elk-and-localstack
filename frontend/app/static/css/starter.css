@@ -40,3 +40,15 @@ code {
   width: 1.25rem !important;
   height: 1.25rem !important;
 }
+
+.flash-alert {
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 1140px;
+  margin-top: 15px;
+}
+
+.box-shadow {
+    box-shadow: 0 .25rem .75rem
+    rgba(0, 0, 0, .05);
+}

@@ -13,3 +13,5 @@ def get_client(service: str) -> boto3.client:
         return boto3.client('dynamodb', endpoint_url='http://aws-stack:4569')
     elif service == 'sqs':
         return boto3.client('sqs', endpoint_url='http://aws-stack:4576')
+    elif service == 'ses':
+        return boto3.client('ses', endpoint_url='http://aws-stack:4579')

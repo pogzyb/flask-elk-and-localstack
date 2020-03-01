@@ -7,10 +7,9 @@ from flask_login import LoginManager
 
 
 logging.basicConfig(format='%(asctime)s:%(levelname)s:%(name)s:%(message)s')
-logging.getLogger(__name__).setLevel(logging.INFO)
+logging.getLogger(__name__).setLevel(logging.DEBUG)
 
-
-# login = LoginManager()
+login = LoginManager()
 db = SQLAlchemy()
 
 
@@ -28,11 +27,13 @@ def create_app():
     else:
         app.config.from_object('config.DevelopmentConfig')
 
-    # login manager
-    # login.init_app(app)
+    login.init_app(app)
+    login.blueprint_login_views = {'auth': '/login'}
 
-    # sqlalchemy db
     db.init_app(app)
+
+    from app.blueprints.auth.email import me
+    me.init_app()
 
     with app.app_context():
         from app.blueprints import api, auth, web

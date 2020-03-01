@@ -1,49 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
-<body>
-    <!-- Begin header and nav -->
-    {% include "header.html" %}
-
-    <!-- Begin page content -->
-    <main role="main" class="container">
-        <div class="row">
-          <div class="col-md-6">
-            <h1 class="mt-5">Enter Anything!</h1>
-            <p class="lead">Quickly pull metrics, references, images, and much more from any Wikipedia page.</p>
-            <p>After submitting, the term and scraping status will appear in the table.</p>
-            <form method="post" action="/scrape">
-                <div class="form-group">
-                    <!--<label for="search-term"></label>-->
-                    <input type="text" class="form-control bg-light" id="search-term" name="search-term" placeholder="Llamas">
-                </div>
-                <button class="btn btn-primary" type="submit">Submit</button>
-            </form>
-          </div>
-          <div class="col-md-6">
-              <div class="card mt-5">
-                  <div id="terms-table" style="display: none;">
-                      <table class="table table-hover">
-                          <thead class="thead-light">
-                          <tr>
-                              <th scope="col">Status</th>
-                              <th scope="col">Term</th>
-                              <th scope="col">Timestamp</th>
-                          </tr>
-                          </thead>
-                          <tbody id="terms"></tbody>
-                      </table>
-                  </div>
-                  <div class="card-footer">
-                      <button id="refresh" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync"></i> Refresh Table</button>
-                  </div>
+<!-- Begin page content -->
+<main role="main" class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h1 class="mt-5">Enter Anything!</h1>
+        <p class="lead">Quickly pull metrics, references, images, and much more from any Wikipedia page.</p>
+        <p>After submitting, the term and scraping status will appear in the table.</p>
+        <form method="post" action="/scrape">
+            <div class="form-group">
+                <!--<label for="search-term"></label>-->
+                <input type="text" class="form-control bg-light" id="search-term" name="search-term" placeholder="Llamas">
+            </div>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+      </div>
+      <div class="col-md-6">
+          <div class="card mt-5 box-shadow">
+              <div id="terms-table" style="display: none;">
+                  <table class="table table-hover">
+                      <thead class="thead-light">
+                      <tr>
+                          <th scope="col">Status</th>
+                          <th scope="col">Term</th>
+                          <th scope="col">Timestamp</th>
+                      </tr>
+                      </thead>
+                      <tbody id="terms"></tbody>
+                  </table>
+              </div>
+              <div class="card-footer">
+                  <button id="refresh" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync"></i> Refresh Table</button>
               </div>
           </div>
-        </div>
-    </main>
-    <!-- Begin footer -->
-    {% include "footer.html" %}
-
-</body>
+      </div>
+    </div>
+</main>
+<!-- Begin footer -->
+{% include "footer.html" %}
 {% endblock %}
 

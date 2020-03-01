@@ -3,7 +3,7 @@ import json
 import logging
 from typing import Dict, Any
 
-from app.utils.api import get_client
+from app.aws_utils.api import get_client
 
 logger = logging.getLogger(__name__)
 

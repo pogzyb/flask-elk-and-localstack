@@ -1,7 +1,6 @@
 FROM python:3.8-alpine
 
 COPY ./frontend/requirements.txt /tmp/requirements.txt
-COPY ./frontend/entrypoint.sh /entrypoint.sh
 
 RUN apk update && apk add \
     build-base \
@@ -21,6 +20,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
+COPY ./frontend/entrypoint.sh /entrypoint.sh
 COPY ./frontend /code
 WORKDIR /code
 
