@@ -4,13 +4,17 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_socketio import SocketIO
+from flask_caching import Cache
 
 
 logging.basicConfig(format='%(asctime)s:%(levelname)s:%(name)s:%(message)s')
 logging.getLogger(__name__).setLevel(logging.DEBUG)
 
-login = LoginManager()
 db = SQLAlchemy()
+login = LoginManager()
+socketio = SocketIO()
+cache = Cache()
 
 
 def create_app():
@@ -26,6 +30,10 @@ def create_app():
         app.config.from_object('config.TestingConfig')
     else:
         app.config.from_object('config.DevelopmentConfig')
+
+    cache.init_app(app)
+
+    socketio.init_app(app)
 
     login.init_app(app)
     login.blueprint_login_views = {'auth': '/login'}
