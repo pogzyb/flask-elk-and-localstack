@@ -9,7 +9,7 @@ RUN apk update && apk add \
     bash \
     && apk add --virtual build-deps \
     gcc \
-    python-dev \
+    python3-dev \
     musl-dev \
     && apk add --no-cache openssl \
     && apk add postgresql-dev \
