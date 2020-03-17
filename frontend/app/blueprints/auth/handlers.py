@@ -58,8 +58,8 @@ def login():
             else:
                 login_user(existing_user)
                 return redirect(url_for('web.index'))
-    else:
-        return render_template('auth/login.html', form=form)
+
+    return render_template('auth/login.html', form=form)
 
 
 @auth.route('/logout', methods=['GET'])
