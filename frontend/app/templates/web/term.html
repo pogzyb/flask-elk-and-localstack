@@ -3,8 +3,20 @@
 {% block content %}
 <!-- Begin page content -->
 <main role="main" class="container">
-    <code>{{data}}</code>
+    <div class="jumbotron">
+        <code id="data">{{ data }}</code>
+    </div>
 </main>
 <!-- Begin footer -->
 {% include "footer.html" %}
+<script type="application/javascript" src="{{ url_for('static', filename='js/view-item.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        var status = "{{ data[0]['standing'] }}";
+        if (status !== 'complete') {
+            var term = "{{ data[0]['name'] }}";
+            poll_status(term);
+    }
+});
+</script>
 {% endblock %}
