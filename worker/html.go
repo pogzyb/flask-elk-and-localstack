@@ -10,13 +10,13 @@ import (
 
 type WikiPage struct {
 	Term    string
-	Metrics map[string]int
+	Tags	map[string]int64
 	Links   []string
 }
 
 func NewWikiPage(term string) *WikiPage {
-	metrics := make(map[string]int)
-	w := WikiPage{Term: term, Metrics: metrics}
+	tags := make(map[string]int64)
+	w := WikiPage{Term: term, Tags: tags}
 	page := getPage(w.Term)
 	w.parseWikiPage(&page)
 	return &w
@@ -53,11 +53,11 @@ func (w *WikiPage) parseWikiPage(Html *io.Reader) {
 func (w *WikiPage) handleStartTag(tokenizer *html.Tokenizer) {
 	tag, hasAttr := tokenizer.TagName()
 	tagString := string(tag)
-	_, exists := w.Metrics[tagString]
+	_, exists := w.Tags[tagString]
 	if !exists {
-		w.Metrics[tagString] = 1
+		w.Tags[tagString] = 1
 	} else {
-		w.Metrics[tagString] += 1
+		w.Tags[tagString] += 1
 	}
 	if tagString == "a" && hasAttr {
 		w.handleHrefAttr(tokenizer)
