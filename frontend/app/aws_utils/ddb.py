@@ -15,7 +15,8 @@ def insert_record(item: Dict[str, Any]) -> None:
                 'name': {'S': item.get('name')},
                 'timestamp': {'S': item.get('timestamp')},
                 'standing': {'S': item.get('standing')},
-                'links': {'L': item.get('links')}
+                'links': {'L': item.get('links')},
+                'tags': {'M': item.get('tags')}
             }
         )
         logger.info(f'Success! Inserted item base.')
@@ -26,7 +27,7 @@ def insert_record(item: Dict[str, Any]) -> None:
 def get_all_records() -> Dict[str, Any]:
     ddb = get_client('dynamodb')
     response = ddb.scan(TableName='Wikis')
-    logger.info(f'{response}')
+    # logger.info(f'{response}')
     return response
 
 
@@ -50,6 +51,13 @@ def extract_from_list(links_list: List[Dict[str, Any]]) -> List[str]:
     return extracted_links_list
 
 
+def extract_from_map(tags_map: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    extracted_tags_dict = {}
+    for key, dict_pair in tags_map.get('M').items():
+        extracted_tags_dict[key] = dict_pair.get('N')
+    return extracted_tags_dict
+
+
 def format_query_result(items_list: List[Dict[str, Dict]]) -> List[Dict[str, str]]:
     formatted_items_list = []
     for item in items_list:
@@ -57,7 +65,8 @@ def format_query_result(items_list: List[Dict[str, Dict]]) -> List[Dict[str, str
             'name': item.get('name').get('S'),
             'standing': item.get('standing').get('S'),
             'timestamp': item.get('timestamp').get('S'),
-            'links': extract_from_list(item.get('links'))
+            'links': extract_from_list(item.get('links')),
+            'tags': extract_from_map(item.get('tags'))
         }
         formatted_items_list.append(formatted_item_dict)
     return formatted_items_list
