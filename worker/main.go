@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./scraper"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"log"
 )
@@ -9,7 +8,7 @@ import (
 func main() {
 	messageChannel := make(chan *sqs.Message, 3)
 
-	c, err := scraper.New()
+	c, err := New()
 	if err != nil {
 		log.Fatalf("Got error: %s", err.Error())
 	}

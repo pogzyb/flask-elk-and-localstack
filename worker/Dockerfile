@@ -1,23 +1,30 @@
-FROM golang:alpine3.10
+# compile stage
+FROM golang:alpine3.11 as compile
 
-RUN apk update && apk add \
+COPY ./worker /go/src/pogzyb/
+
+WORKDIR /go/src/pogzyb/
+
+RUN apk add git
+RUN go get -v ./...
+RUN GOARCH=amd64 GOOS=linux go build -o consume .
+
+# complete stage
+FROM alpine:3.11
+
+RUN apk update && apk add --no-cache \
     bash \
-    git \
     wget \
-    && apk add --no-cache openssl
+    openssl
 
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-COPY ./worker /code
+COPY ./worker/start.sh /code/start.sh
+
 RUN chmod +x /code/start.sh
+COPY --from=compile /go/src/pogzyb/consume /code/consume
 
-RUN go get -u github.com/aws/aws-sdk-go
-RUN go get -u golang.org/x/net/html
-
-WORKDIR /code
-
-# todo: - localstack services will accept tcp before init-aws.sh runs in init.d
 CMD ["/code/start.sh"]
