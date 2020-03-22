@@ -8,6 +8,9 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('APP_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    CACHE_TYPE = 'simple'
+    CACHE_DEFAULT_TIMEOUT = 300
+
 
 class ProductionConfig(Config):
     pass

@@ -39,9 +39,9 @@ class MailExecutor:
             worker.start()
             logger.info(f'Launched mail-worker-{i+1}')
 
-    def send_password_reset_email(self, email: str) -> None:
+    def send_password_reset_email(self, email: str, token: str) -> None:
         """sends email address to queue"""
-        self._queue.put(item=email, block=False)
+        self._queue.put(item=(email, token), block=False)
         logger.info(f'Sent {email} to email queue')
 
 
@@ -53,8 +53,9 @@ class MailSender:
 
     def listen_for_mail(self, q: Queue):
         while True:
+            # todo: correctly operating email function
             logger.debug(f'{self.name} is listening')
-            email = q.get(block=True)
+            email, token = q.get(block=True)
             if email:
                 send_email(
                     subject='Hello',

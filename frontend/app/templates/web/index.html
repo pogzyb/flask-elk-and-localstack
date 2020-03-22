@@ -30,14 +30,17 @@
                       <tbody id="terms"></tbody>
                   </table>
               </div>
+              <!--
               <div class="card-footer">
                   <button id="refresh" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync"></i> Refresh Table</button>
               </div>
+              -->
           </div>
       </div>
     </div>
 </main>
 <!-- Begin footer -->
 {% include "footer.html" %}
+<script src="{{ url_for('static', filename='js/table-items.js') }}"></script>
 {% endblock %}
 

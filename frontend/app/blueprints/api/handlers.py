@@ -2,6 +2,7 @@ import logging
 
 from flask import jsonify, request
 
+from app import cache
 from app.blueprints.api import api
 from app.aws_utils.ddb import (
     get_all_records,
@@ -14,8 +15,10 @@ from app.aws_utils.ddb import (
 logger = logging.getLogger(__name__)
 
 
-@api.route('/table')
-def table():
+@api.route('/recent-submissions-table')
+@cache.cached(timeout=60)
+def recent_submissions_table():
+    """Returns most recent submissions"""
     wiki_records = get_all_records()
     data = format_query_result(wiki_records['Items'])
     return jsonify(data), 200
