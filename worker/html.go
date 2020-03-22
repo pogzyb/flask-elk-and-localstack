@@ -9,9 +9,9 @@ import (
 )
 
 type WikiPage struct {
-	Term	string
-	Metrics	map[string]int
-	Links	[]string
+	Term    string
+	Metrics map[string]int
+	Links   []string
 }
 
 func NewWikiPage(term string) *WikiPage {
@@ -52,7 +52,7 @@ func (w *WikiPage) parseWikiPage(Html *io.Reader) {
 
 func (w *WikiPage) handleStartTag(tokenizer *html.Tokenizer) {
 	tag, hasAttr := tokenizer.TagName()
-	tagString :=  string(tag)
+	tagString := string(tag)
 	_, exists := w.Metrics[tagString]
 	if !exists {
 		w.Metrics[tagString] = 1

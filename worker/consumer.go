@@ -70,7 +70,7 @@ func (c *Consumer) HandleMessage(message *sqs.Message) {
 	log.Printf("Attempting to process and update item!\n")
 	// todo: processing here
 	w := NewWikiPage(item.Name)
-	log.Println(w)
+	item.Links = w.Links
 	// end processing
 	c.UpdateItem(&item)
 }
@@ -110,6 +110,15 @@ func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 	//if err != nil {
 	//	log.Fatalf("Problem marshalling input-item: %s", err.Error())
 	//}
+
+	var links []*dynamodb.AttributeValue
+	for _, ln := range inputItemRaw.Links {
+		lnAv := &dynamodb.AttributeValue{
+			S: aws.String(ln),
+		}
+		links = append(links, lnAv)
+	}
+
 	key := map[string]*dynamodb.AttributeValue{
 		"name": {
 			S: aws.String(inputItemRaw.Name),
@@ -123,12 +132,18 @@ func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 		":s": {
 			S: aws.String("complete"),
 		},
+		":l": {
+			L: links,
+		},
+		":empty_list": {
+			L: []*dynamodb.AttributeValue{},
+		},
 	}
 	inputItemReady := &dynamodb.UpdateItemInput{
 		Key:                       key,
 		ExpressionAttributeValues: update,
 		TableName:                 aws.String(c.DdbTableName),
-		UpdateExpression:          aws.String("set standing = :s"),
+		UpdateExpression:          aws.String("set standing = :s, links = list_append(if_not_exists(links, :empty_list), :l)"),
 		ReturnValues:              aws.String("UPDATED_NEW"),
 	}
 	// DO UPDATE
