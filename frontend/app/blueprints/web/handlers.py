@@ -41,7 +41,8 @@ def scrape_term():
     payload = {
         'name': form.get('search-term'),
         'timestamp': datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        'standing': 'pending'
+        'standing': 'pending',
+        'links': []
     }
     insert_record(item=payload)
     send_to_queue(item=payload)
@@ -62,8 +63,8 @@ def page_socket(term: str):
         record = get_single_record(term)
         data = format_query_result([record['Item']])[0]
         if data.get('standing') == 'complete':
-            logger.info(f'Complete!')
+            logger.info(f'Complete!: {data}')
             break
         time.sleep(1)
 
-    emit('status', {'message': 'Done!'})
+    emit('status', {'message': data})

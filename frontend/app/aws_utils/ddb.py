@@ -14,7 +14,8 @@ def insert_record(item: Dict[str, Any]) -> None:
             Item={
                 'name': {'S': item.get('name')},
                 'timestamp': {'S': item.get('timestamp')},
-                'standing': {'S': item.get('standing')}
+                'standing': {'S': item.get('standing')},
+                'links': {'L': item.get('links')}
             }
         )
         logger.info(f'Success! Inserted item base.')
@@ -42,13 +43,21 @@ def get_single_record(term: str) -> Dict[str, Any]:
     return response
 
 
+def extract_from_list(links_list: List[Dict[str, Any]]) -> List[str]:
+    extracted_links_list = []
+    for dict_pair in links_list.get('L'):
+        extracted_links_list.append(dict_pair.get('S'))
+    return extracted_links_list
+
+
 def format_query_result(items_list: List[Dict[str, Dict]]) -> List[Dict[str, str]]:
     formatted_items_list = []
     for item in items_list:
         formatted_item_dict = {
             'name': item.get('name').get('S'),
             'standing': item.get('standing').get('S'),
-            'timestamp': item.get('timestamp').get('S')
+            'timestamp': item.get('timestamp').get('S'),
+            'links': extract_from_list(item.get('links'))
         }
         formatted_items_list.append(formatted_item_dict)
     return formatted_items_list
