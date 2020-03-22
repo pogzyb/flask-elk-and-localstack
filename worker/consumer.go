@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"log"
 	"os"
@@ -68,9 +69,9 @@ func (c *Consumer) HandleMessage(message *sqs.Message) {
 		log.Fatalf("Problem unmarshaling message body: %s", err.Error())
 	}
 	log.Printf("Attempting to process and update item!\n")
-	// todo: processing here
 	w := NewWikiPage(item.Name)
 	item.Links = w.Links
+	item.Tags = w.Tags
 	// end processing
 	c.UpdateItem(&item)
 }
@@ -105,12 +106,12 @@ func (c *Consumer) DeleteMessage(message *sqs.Message) {
 //}
 
 func (c *Consumer) UpdateItem(inputItemRaw *Item) {
-	// key item
-	//inputItemMarshaled, err := dynamodbattribute.MarshalMap(inputItemRaw)
-	//if err != nil {
-	//	log.Fatalf("Problem marshalling input-item: %s", err.Error())
-	//}
-
+	// convert "metrics" map into DDB attribute
+	tags, err := dynamodbattribute.MarshalMap(inputItemRaw.Tags)
+	if err != nil {
+		log.Fatalf("Problem marshalling metrics: %s", err.Error())
+	}
+	// convert "links" slice into DDB attribute
 	var links []*dynamodb.AttributeValue
 	for _, ln := range inputItemRaw.Links {
 		lnAv := &dynamodb.AttributeValue{
@@ -118,7 +119,7 @@ func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 		}
 		links = append(links, lnAv)
 	}
-
+	// construct DDB key
 	key := map[string]*dynamodb.AttributeValue{
 		"name": {
 			S: aws.String(inputItemRaw.Name),
@@ -127,7 +128,7 @@ func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 		//	S: aws.String(inputItemRaw.Timestamp),
 		//},
 	}
-	// updated item
+	// construct DDB update values
 	update := map[string]*dynamodb.AttributeValue{
 		":s": {
 			S: aws.String("complete"),
@@ -135,19 +136,22 @@ func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 		":l": {
 			L: links,
 		},
-		":empty_list": {
-			L: []*dynamodb.AttributeValue{},
+		":t": {
+			M: tags,
 		},
 	}
+	// construct UpdateExpression
+	expression := aws.String("set standing = :s, links = :l, tags = :t")
+	// construct DDB Input
 	inputItemReady := &dynamodb.UpdateItemInput{
 		Key:                       key,
 		ExpressionAttributeValues: update,
 		TableName:                 aws.String(c.DdbTableName),
-		UpdateExpression:          aws.String("set standing = :s, links = list_append(if_not_exists(links, :empty_list), :l)"),
+		UpdateExpression:          expression,
 		ReturnValues:              aws.String("UPDATED_NEW"),
 	}
 	// DO UPDATE
-	_, err := c.Ddb.UpdateItem(inputItemReady)
+	_, err = c.Ddb.UpdateItem(inputItemReady)
 	if err != nil {
 		log.Fatalf("Problem updating item in Ddb table: %s", err.Error())
 	}
