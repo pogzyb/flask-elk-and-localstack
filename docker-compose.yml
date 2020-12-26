@@ -1,13 +1,13 @@
 ---
 version: "3.5"
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: nginx/Dockerfile
-    container_name: nginx
-    ports:
-      - "80:80"
+#  nginx:
+#    build:
+#      context: .
+#      dockerfile: nginx/Dockerfile
+#    container_name: nginx
+#    ports:
+#      - "80:80"
 
   frontend:
     build:
@@ -34,14 +34,14 @@ services:
       - POSTGRES_PASSWORD=w1k123
       - POSTGRES_DB=wikifrontend
 
-  worker:
+  sqs-consumer:
     build:
       context: .
-      dockerfile: worker/Dockerfile
-    container_name: worker
+      dockerfile: sqs-consumer/Dockerfile
+    container_name: sqs-consumer
     env_file:
       - "vars.env"
-    entrypoint: ["dockerize", "-wait", "tcp://aws-stack:4569", "-timeout", "300s"]
+    entrypoint: ["dockerize", "-wait", "tcp://aws-stack:4566", "-timeout", "300s"]
     command: ["/code/start.sh"]
 
   aws-stack:
@@ -49,15 +49,16 @@ services:
     hostname: aws-stack
     container_name: aws-stack
     environment:
-      - SERVICES=sqs:4576,dynamodb:4569,ses:4579
+      - SERVICES=sqs,dynamodb,ses,kinesis,lambda
       - DEBUG=1
+      - LAMBDA_EXECUTOR=local
+      - PORT_WEB_UI=9999
+      - HOSTNAME_EXTERNAL=aws-stack
     ports:
-      - "4579:4579"
-      - "4576:4576"
-      - "4569:4569"
-      - "4564:4564"
-      - "8055:8080"
+      - "9999:9999"
+      - "4566:4566"
     volumes:
-      - "./init-aws/scripts:/docker-entrypoint-initaws.d"
-      - "./init-aws/dynamodb/wikis.json:/tmp/wikis.json"
+      - "./aws/startup:/docker-entrypoint-initaws.d"
+      - "./aws/dynamodb-json/wikis.json:/tmp/wikis.json"
+      - "./aws/lambda-files/py-handler.zip:/tmp/lambda-files/py-handler.zip"
       - "./data:/tmp/localstack"
