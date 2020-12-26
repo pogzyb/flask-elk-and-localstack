@@ -8,17 +8,17 @@ aws configure set aws_default_output json
 export REGION=us-east-1
 
 # verify an email with SES
-aws --endpoint-url=http://0.0.0.0:4579 ses verify-email-identity \
-    --email-address joebarzanek@gmail.com \
+aws --endpoint-url=http://0.0.0.0:4566 ses verify-email-identity \
+    --email-address fake@email.com \
     --region ${REGION}
 
 # create a queue in SQS
-aws --endpoint-url=http://0.0.0.0:4576 sqs create-queue \
+aws --endpoint-url=http://0.0.0.0:4566 sqs create-queue \
     --queue-name wikis \
     --region ${REGION}
 
 # create a table in DynamoDB
-aws --endpoint-url=http://0.0.0.0:4569 dynamodb create-table \
+aws --endpoint-url=http://0.0.0.0:4566 dynamodb create-table \
     --table-name Wikis \
     --cli-input-json file:///tmp/wikis.json \
     --region ${REGION}

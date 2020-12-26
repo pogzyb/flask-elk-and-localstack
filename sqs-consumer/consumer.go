@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"log"
 	"os"
+	"time"
 )
 
 type Consumer struct {
@@ -21,28 +22,21 @@ type Consumer struct {
 
 func New() (*Consumer, error) {
 	// Need two separate session configs because of localstack env
-	ddbSess, err := session.NewSession(&aws.Config{
+	sess, err := session.NewSession(&aws.Config{
 		Region:   aws.String("us-east-1"),
-		Endpoint: aws.String("http://aws-stack:4564"),
+		Endpoint: aws.String("http://aws-stack:4566"),
 	})
 	if err != nil {
 		return nil, err
 	}
-	sqsSess, err := session.NewSession(&aws.Config{
-		Region:   aws.String("us-east-1"),
-		Endpoint: aws.String("http://aws-stack:4576"),
-	})
-	if err != nil {
-		return nil, err
-	}
-	queueUrl := os.Getenv("AWS_SQS_QUEUE_URL")
+
 	c := Consumer{
-		Ddb:          dynamodb.New(ddbSess),
+		Ddb:          dynamodb.New(sess),
 		DdbTableName: os.Getenv("AWS_DDB_TABLE_NAME"),
-		Sqs:          sqs.New(sqsSess),
-		SqsQUrl:      queueUrl,
+		Sqs:          sqs.New(sess),
+		SqsQUrl:      os.Getenv("AWS_SQS_QUEUE_URL"),
 		SqsReceiveParams: &sqs.ReceiveMessageInput{
-			QueueUrl:            aws.String(queueUrl),
+			QueueUrl:            aws.String(os.Getenv("AWS_SQS_QUEUE_URL")),
 			MaxNumberOfMessages: aws.Int64(3),
 			VisibilityTimeout:   aws.Int64(30),
 			WaitTimeSeconds:     aws.Int64(20),
@@ -55,7 +49,7 @@ func (c *Consumer) PollMessageQueue(channel chan<- *sqs.Message) {
 	for {
 		received, err := c.Sqs.ReceiveMessage(c.SqsReceiveParams)
 		if err != nil {
-			log.Fatalf("Problem receiving message: %s", err.Error())
+			log.Fatalf("problem polling sqs: %v\n", err)
 		}
 		for _, message := range received.Messages {
 			channel <- message
@@ -66,14 +60,17 @@ func (c *Consumer) PollMessageQueue(channel chan<- *sqs.Message) {
 func (c *Consumer) HandleMessage(message *sqs.Message) {
 	item := Item{}
 	if err := json.Unmarshal([]byte(*message.Body), &item); err != nil {
-		log.Fatalf("Problem unmarshaling message body: %s", err.Error())
+		log.Fatalf("problem unmarshaling message body: %v\n", err)
 	}
-	log.Printf("Attempting to process and update item!\n")
+	log.Printf("Processing [%s]...\n", item.Name)
 	w := NewWikiPage(item.Name)
 	item.Links = w.Links
 	item.Tags = w.Tags
+	// mimic some long background process
+	time.Sleep(time.Second * 10)
 	// end processing
 	c.UpdateItem(&item)
+	log.Printf("Processing complete! Updated [%s]\n", item.Name)
 }
 
 func (c *Consumer) DeleteMessage(message *sqs.Message) {
@@ -155,5 +152,4 @@ func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 	if err != nil {
 		log.Fatalf("Problem updating item in Ddb table: %s", err.Error())
 	}
-	log.Printf("Success! Updated item [%s]\n", inputItemRaw.Name)
 }

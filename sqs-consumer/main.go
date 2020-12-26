@@ -6,13 +6,16 @@ import (
 )
 
 func main() {
+	// buffered channel to handle incoming messages
 	messageChannel := make(chan *sqs.Message, 3)
 
+	// init new "Consumer"
 	c, err := New()
 	if err != nil {
-		log.Fatalf("Got error: %s", err.Error())
+		log.Fatalf("error trying to init consumer: %v\n", err)
 	}
 
+	//
 	go c.PollMessageQueue(messageChannel)
 
 	for msg := range messageChannel {

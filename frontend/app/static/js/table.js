@@ -23,6 +23,8 @@ function load_table() {
                 } else {
                     console.log('TODO: update existing statuses')
                 }
+            } else {
+                console.log('Nothing!');
             }
         },
         error: function (err) {
