@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
+	// unbuffered channel to handle completion
+	done := make(chan struct{})
+
 	// buffered channel to handle incoming messages
 	messageChannel := make(chan *sqs.Message, 3)
 
@@ -20,7 +23,10 @@ func main() {
 
 	for msg := range messageChannel {
 		log.Println("Got a message!", msg)
-		c.HandleMessage(msg)
-		c.DeleteMessage(msg)
+		go func(message *sqs.Message) {
+			c.HandleMessage(message)
+			c.DeleteMessage(message)
+		}(msg)
 	}
+	<- done
 }

@@ -80,7 +80,7 @@ func (c *Consumer) DeleteMessage(message *sqs.Message) {
 	}
 	_, err := c.Sqs.DeleteMessage(deleteParams)
 	if err != nil {
-		log.Printf("Problem deleteing message [%s]: %s", *message.MessageId, err.Error())
+		log.Printf("Problem deleteing message [%s]: %v", *message.MessageId, err)
 	}
 	log.Printf("Deleted message [%s]\n", *message.MessageId)
 }
