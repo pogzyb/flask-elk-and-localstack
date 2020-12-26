@@ -9,11 +9,14 @@ RUN apk update && apk add \
     bash \
     && apk add --virtual build-deps \
     gcc \
+    libffi-dev \
     python3-dev \
     musl-dev \
+    py3-gevent \
     && apk add --no-cache openssl \
     && apk add postgresql-dev \
-    && pip install -r /tmp/requirements.txt
+    && pip3 install -r /tmp/requirements.txt \
+    && apk del build-deps
 
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \

@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
-# todo: migrations
+#flask db upgrade
 
-#gunicorn --worker-class eventlet -w 1 app:create_app
+debug=${DEBUG}
 
-python /code/main.py
+if [[ $debug == "0" ]]; then
+  echo "Running in production mode."
+  gunicorn --worker-class gevent -w 1 --threads 2 --bind 0.0.0.0:${APP_PORT} "app:create_app()"
+else
+  echo "Running in non-production mode."
+  python ${APP_BASE_DIR}/main.py
+fi

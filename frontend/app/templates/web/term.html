@@ -7,16 +7,24 @@
         <code id="data">{{ data }}</code>
     </div>
 </main>
+
 <!-- Begin footer -->
 {% include "footer.html" %}
-<script type="application/javascript" src="{{ url_for('static', filename='js/view-item.js') }}"></script>
+<!-- Begin core js -->
+{% include "core_js.html" %}
+<!-- js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ url_for("static", filename="js/poll.js") }}"></script>
 <script>
     $(document).ready(function () {
         var status = "{{ data[0]['standing'] }}";
+        console.log(status);
         if (status !== 'complete') {
             var term = "{{ data[0]['name'] }}";
+            console.log(term);
             poll_status(term);
     }
 });
 </script>
+<!-- End -->
 {% endblock %}

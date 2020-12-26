@@ -1,40 +1,42 @@
 import logging
+import os
 from typing import Dict, List, Any
+from threading import RLock
 
-from app.aws_utils.api import get_client
+from app.aws_utils import get_client
 
 logger = logging.getLogger(__name__)
 
 
 def insert_record(item: Dict[str, Any]) -> None:
     ddb = get_client('dynamodb')
-    try:
-        ddb.put_item(
-            TableName='Wikis',
-            Item={
-                'name': {'S': item.get('name')},
-                'timestamp': {'S': item.get('timestamp')},
-                'standing': {'S': item.get('standing')},
-                'links': {'L': item.get('links')},
-                'tags': {'M': item.get('tags')}
-            }
-        )
-        logger.info(f'Success! Inserted item base.')
-    except Exception as e:
-        logger.exception(e)
+    with RLock():
+        try:
+            ddb.put_item(
+                TableName=os.getenv('AWS_DDB_TABLE_NAME'),
+                Item={
+                    'name': {'S': item.get('name')},
+                    'timestamp': {'S': item.get('timestamp')},
+                    'standing': {'S': item.get('standing')},
+                    'links': {'L': item.get('links')},
+                    'tags': {'M': item.get('tags')}
+                }
+            )
+            logger.info(f'Success! Inserted item base.')
+        except Exception:
+            logger.exception(f'could not put_item:')
 
 
 def get_all_records() -> Dict[str, Any]:
     ddb = get_client('dynamodb')
-    response = ddb.scan(TableName='Wikis')
-    # logger.info(f'{response}')
+    response = ddb.scan(TableName=os.getenv('AWS_DDB_TABLE_NAME'))
     return response
 
 
-def get_single_record(term: str) -> Dict[str, Any]:
+def get_record(term: str) -> Dict[str, Any]:
     ddb = get_client('dynamodb')
     response = ddb.get_item(
-        TableName='Wikis',
+        TableName=os.getenv('AWS_DDB_TABLE_NAME'),
         Key={
             'name': {
                 'S': term
@@ -58,7 +60,7 @@ def extract_from_map(tags_map: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     return extracted_tags_dict
 
 
-def format_query_result(items_list: List[Dict[str, Dict]]) -> List[Dict[str, str]]:
+def format_record(items_list: List[Dict[str, Dict]]) -> List[Dict[str, str]]:
     formatted_items_list = []
     for item in items_list:
         formatted_item_dict = {
