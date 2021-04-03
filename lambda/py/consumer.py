@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 def lambda_handler(event, context):
     """
     Process events from the Kinesis stream.
-    **Nothing fancy happens for the moment; just logs the data.
+    **Nothing fancy happens; just logs the data.
 
     :param event: the event that this function will process
     :param context: context object for the function

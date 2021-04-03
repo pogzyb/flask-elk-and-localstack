@@ -1,17 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"context"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type MyEvent struct {
-	Name string `json:"name"`
+type Event struct {
+	Records []Record `json:"event"`
 }
 
-func HandleRequest(ctx context.Context, name MyEvent) (string, error) {
-	return fmt.Sprintf("Hello %s!", name.Name ), nil
+type Record struct {
+
+}
+
+func HandleRequest(ctx context.Context, event Event) (string, error) {
+	log.Printf("Handling %d records", len(event.Records))
+	return "", nil
 }
 
 func main() {
