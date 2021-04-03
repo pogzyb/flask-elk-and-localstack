@@ -1,7 +1,7 @@
 # compile stage
 FROM golang:alpine3.11 as compile
 
-COPY ./sqs-consumer /go/src/pogzyb/
+COPY ./sqs /go/src/pogzyb/
 
 WORKDIR /go/src/pogzyb/
 
@@ -22,7 +22,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-COPY ./sqs-consumer/start.sh /code/start.sh
+COPY ./sqs/start.sh /code/start.sh
 
 RUN chmod +x /code/start.sh
 COPY --from=compile /go/src/pogzyb/consume /code/consume
