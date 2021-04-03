@@ -9,24 +9,25 @@ services:
 #    ports:
 #      - "80:80"
 
-  frontend:
+  app:
     build:
       context: .
-      dockerfile: frontend/Dockerfile
-    container_name: frontend-app
+      dockerfile: scrapp/Dockerfile
+    container_name: app
     env_file:
-      - "vars.env"
+      - ".env.local"
     ports:
       - "8080:8080"
     volumes:
-      - "./frontend/app/:/code/app"
-    entrypoint: "dockerize -wait tcp://db-frontend:5432 -timeout 60s"
+      - "./scrapp:/scrapp"
+      - "./data/logs:/logs"
+    entrypoint: "dockerize -wait tcp://database:5432 -timeout 60s"
     command: ["/bin/ash", "-c", "/entrypoint.sh"]
 
-  db-frontend:
+  database:
     image: postgres:11
-    container_name: db-frontend
-    hostname: db-frontend
+    container_name: database
+    hostname: database
     ports:
       - "5432:5432"
     environment:
@@ -34,13 +35,20 @@ services:
       - POSTGRES_PASSWORD=w1k123
       - POSTGRES_DB=wikifrontend
 
+  cache:
+    image: library/redis:6.0-alpine
+    container_name: cache
+    hostname: cache
+    ports:
+      - "6379:6379"
+
   sqs-consumer:
     build:
       context: .
-      dockerfile: sqs-consumer/Dockerfile
+      dockerfile: sqs/Dockerfile
     container_name: sqs-consumer
     env_file:
-      - "vars.env"
+      - ".env.local"
     entrypoint: ["dockerize", "-wait", "tcp://aws-stack:4566", "-timeout", "300s"]
     command: ["/code/start.sh"]
 
@@ -61,4 +69,72 @@ services:
       - "./aws/startup:/docker-entrypoint-initaws.d"
       - "./aws/dynamodb-json/wikis.json:/tmp/wikis.json"
       - "./aws/lambda-files/py-handler.zip:/tmp/lambda-files/py-handler.zip"
-      - "./data:/tmp/localstack"
+      - "./data/localstack:/tmp/localstack"
+#
+  elasticsearch:
+    image: library/elasticsearch:7.11.2
+    container_name: elasticsearch
+    hostname: elasticsearch
+    environment:
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "50"
+
+  logstash:
+    image: library/logstash:7.11.2
+    container_name: logstash
+    hostname: logstash
+    volumes:
+      - "./logstash/config:/usr/share/logstash/config"
+      - "./logstash/pipeline:/usr/share/logstash/pipeline"
+      - "./logstash/templates:/usr/share/logstash/templates"
+    environment:
+      - SOFTWARE_INSTALL_FOLDER=/usr/share/logstash
+      - PIPELINE_CONFIG=/usr/share/logstash/pipeline
+      - ELASTICSEARCH_HOSTS=elasticsearch:9200
+      - ELASTICSEARCH_HTTP_HOST=http://elasticsearch:9200
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: library/kibana:7.11.2
+    container_name: kibana
+    hostname: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: elastic/filebeat:7.11.2
+    container_name: filebeat
+    volumes:
+      - "/var/run/docker.sock:/host_docker/docker.sock"
+      - "/var/lib/docker:/host_docker/var/lib/docker"
+      - "./data/logs:/usr/share/filebeat/applogs/scrapp_logs"
+      - "./filebeat/config/inputs.d:/usr/share/filebeat/inputs.d"
+      - "./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml"
+    environment:
+      - SOFTWARE_INSTALL_FOLDER=/usr/share/filebeat
+      - LOGSTASH-HOST=logstash
+      - LOGSTASH-PORT=5044
+      - ELASTICSEARCH_HOSTS=elasticsearch:9200
+      - ELASTICSEARCH_HTTP_HOST=http://elasticsearch:9200
+    depends_on:
+      - logstash

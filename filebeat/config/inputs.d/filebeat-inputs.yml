@@ -1,0 +1,4 @@
+- type: log
+  enabled: true
+  paths:
+    - /usr/share/filebeat/applogs/scrapp_logs/*.log

@@ -1,0 +1,17 @@
+filebeat.config.inputs:
+  enabled: true
+  path: inputs.d/*.yml
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+processors:
+  - add_docker_metadata:
+      host: "unix:///host_docker/docker.sock"
+
+  - decode_json_fields:
+      fields: ["message"]
+      process_array: false
+      max_depth: 3
+      target: ""
+      overwrite_keys: true

@@ -1,0 +1,5 @@
+# define pipelines here; you can define multiple.
+# docs:
+
+- pipeline.id: main
+  path.config: "${PIPELINE_CONFIG}"
