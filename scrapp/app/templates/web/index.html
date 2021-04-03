@@ -1,0 +1,47 @@
+{% import "lib/messages.html" as msgs %}
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Begin page content -->
+<main role="main" class="container-xl">
+    {{ msgs.display_messages() }}
+    <div class="row">
+      <div class="col-md-6">
+        <h1 class="mt-5">Enter Anything!</h1>
+        <p class="lead">Quickly pull metrics, references, images, and much more from any Wikipedia page.</p>
+        <p>After submitting, the term and scraping status will appear in the table.</p>
+        <form method="post" action="/scrape">
+            <div class="form-group">
+                <!--<label for="search-term"></label>-->
+                <input type="text" class="form-control bg-light" id="search-term" name="search-term" placeholder="Llamas">
+            </div>
+            <hr>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+      </div>
+      <div class="col-md-6">
+          <div class="mt-5" id="terms-fill" style="display: none;"></div>
+          <div class="card mt-5 box-shadow">
+              <div id="terms-table" style="display: none;">
+                  <table class="mb-0 table">
+                      <thead class="table-dark">
+                      <tr>
+                          <th scope="col">Status</th>
+                          <th scope="col">Term</th>
+                          <th scope="col">Timestamp</th>
+                          <th scope="col">Actions</th>
+                      </tr>
+                      </thead>
+                      <tbody id="terms"></tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+    </div>
+</main>
+<!-- Begin footer -->
+{% include "footer.html" %}
+{% include "core_js.html" %}
+<script src="{{ url_for("static", filename="js/table.js") }}"></script>
+{% endblock %}
+

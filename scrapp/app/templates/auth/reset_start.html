@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Begin page content -->
+<main role="main" class="container">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-6 card bg-light box-shadow">
+            <div class="card-body">
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Send password reset details to this email address:
+                    </p>
+                    <div class="mb-2 form-floating">
+                        {{ form.email(class_="form-control", id="emailInput", placeholder="name@example.com") }}
+                        <label for="emailInput"><i class="fas fa-envelope"></i> Email Address</label>
+                        {% for error in form.email.errors %}
+                        <span class="error-message"><i class="fas fa-times"></i> {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <hr>
+                    {{ form.submit(class_="w-100 btn btn-lg btn-primary") }}
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+</main>
+<!-- Begin footer -->
+{% include "footer.html" %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% macro display_messages() %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message, category in messages %}
+            <div class="box-shadow alert alert-{{category}} alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{%- endmacro %}
