@@ -3,6 +3,7 @@ import base64
 import json
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
@@ -14,7 +15,6 @@ def lambda_handler(event, context):
     :param context: context object for the function
     :return:
     """
-    logger.info(f'lambda handler is processing [{len(event["Records"])}] events.')
     for record in event['Records']:
         decoded = base64.b64decode(record['kinesis']['data'])
         payload = json.loads(decoded)

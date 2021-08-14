@@ -2,8 +2,10 @@
 
 go get github.com/aws/aws-lambda-go/lambda
 
-GOOS=linux go build go/ddb_to_es/handler.go -o main
+cd ddb_to_es
 
-zip ddb_handler.zip main
+GOOS=linux go build handler.go
 
-mv ddb_handler.zip ../aws/lambda-files/ddb_handler.zip
+zip ddb_handler.zip handler
+
+mv ddb_handler.zip ../../../aws/lambda-files/ddb_handler.zip

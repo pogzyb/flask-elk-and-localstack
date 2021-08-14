@@ -1,24 +1,26 @@
+import argparse
 import os
 import zipfile
 
 
-lambda_file_name = "./py/consumer.py"
-lambda_zip_file_name = "py-handler.zip"
-output_path = os.path.join(os.getcwd(), "..", "aws/lambda-files/", lambda_zip_file_name)
-
-
-def zip_and_move_lambda():
+def zip_and_move_lambda(src_path: str, dst_path: str):
     """
     zips the python lambda function script and moves it into `<project_home>/aws/lambda-files`
-
-    :return:
     """
-    with zipfile.ZipFile(lambda_zip_file_name, 'w') as zipped:
-        zipped.write(lambda_file_name)
+    if not os.path.isfile(dst_path):
+        dst_file = os.path.split(dst_path)[-1]
+    else:
+        dst_file = dst_path
 
-    os.rename(lambda_zip_file_name, output_path)
-    return
+    with zipfile.ZipFile(dst_file, 'w') as zipped:
+        zipped.write(src_path)
+
+    os.replace(dst_file, dst_path)
 
 
 if __name__ == '__main__':
-    zip_and_move_lambda()
+    parser = argparse.ArgumentParser(description="Python Lambda Zipper")
+    parser.add_argument('--src', type=str, help='The .py lambda filepath')
+    parser.add_argument('--dst', type=str, help='The .zip filepath')
+    args = parser.parse_args()
+    zip_and_move_lambda(args.src, args.dst)
