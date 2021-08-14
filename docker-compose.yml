@@ -1,18 +1,23 @@
 ---
 version: "3.5"
 services:
-#  nginx:
-#    build:
-#      context: .
-#      dockerfile: nginx/Dockerfile
-#    container_name: nginx
-#    ports:
-#      - "80:80"
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - app_default
 
   app:
     build:
       context: .
       dockerfile: scrapp/Dockerfile
+    hostname: app
     container_name: app
     env_file:
       - ".env.local"
@@ -21,8 +26,10 @@ services:
     volumes:
       - "./scrapp:/scrapp"
       - "./data/logs:/logs"
-    entrypoint: "dockerize -wait tcp://database:5432 -timeout 60s"
+    entrypoint: "dockerize -wait tcp://database:5432 -timeout 120s" # -wait http://elasticsearch:9200"
     command: ["/bin/ash", "-c", "/entrypoint.sh"]
+    networks:
+      - app_default
 
   database:
     image: postgres:11
@@ -34,6 +41,8 @@ services:
       - POSTGRES_USER=wikiman
       - POSTGRES_PASSWORD=w1k123
       - POSTGRES_DB=wikifrontend
+    networks:
+      - app_default
 
   cache:
     image: library/redis:6.0-alpine
@@ -41,6 +50,8 @@ services:
     hostname: cache
     ports:
       - "6379:6379"
+    networks:
+      - app_default
 
   sqs-consumer:
     build:
@@ -51,26 +62,37 @@ services:
       - ".env.local"
     entrypoint: ["dockerize", "-wait", "tcp://aws-stack:4566", "-timeout", "300s"]
     command: ["/code/start.sh"]
+    networks:
+      - app_default
 
   aws-stack:
-    image: localstack/localstack:latest
+    image: localstack/localstack-full:0.12.13
     hostname: aws-stack
     container_name: aws-stack
     environment:
-      - SERVICES=sqs,dynamodb,ses,kinesis,lambda
       - DEBUG=1
-      - LAMBDA_EXECUTOR=local
-      - PORT_WEB_UI=9999
+      - SERVICES=sqs,dynamodb,ses,kinesis,lambda,logs,cloudwatch
+      - LAMBDA_EXECUTOR=docker
+      - LAMBDA_DOCKER_NETWORK=app_default
+      - LAMBDA_REMOTE_DOCKER=true
+      - LAMBDA_REMOVE_CONTAINERS=false
       - HOSTNAME_EXTERNAL=aws-stack
+      - HOSTNAME_FROM_LAMBDA=aws-stack
+      - PORT_WEB_UI=9999
+      - START_WEB=1
     ports:
       - "9999:9999"
       - "4566:4566"
+      - "4586:4586"
     volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
       - "./aws/startup:/docker-entrypoint-initaws.d"
       - "./aws/dynamodb-json/wikis.json:/tmp/wikis.json"
-      - "./aws/lambda-files/py-handler.zip:/tmp/lambda-files/py-handler.zip"
+      - "./aws/lambda-files:/tmp/lambda-files"
       - "./data/localstack:/tmp/localstack"
-#
+    networks:
+      - app_default
+
   elasticsearch:
     image: library/elasticsearch:7.11.2
     container_name: elasticsearch
@@ -91,6 +113,8 @@ services:
       options:
         max-size: "10m"
         max-file: "50"
+    networks:
+      - app_default
 
   logstash:
     image: library/logstash:7.11.2
@@ -109,6 +133,8 @@ services:
       - "5044:5044"
     depends_on:
       - elasticsearch
+    networks:
+      - app_default
 
   kibana:
     image: library/kibana:7.11.2
@@ -120,6 +146,8 @@ services:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
     depends_on:
       - elasticsearch
+    networks:
+      - app_default
 
   filebeat:
     image: elastic/filebeat:7.11.2
@@ -138,3 +166,9 @@ services:
       - ELASTICSEARCH_HTTP_HOST=http://elasticsearch:9200
     depends_on:
       - logstash
+    networks:
+      - app_default
+
+networks:
+  app_default:
+    name: app_default
