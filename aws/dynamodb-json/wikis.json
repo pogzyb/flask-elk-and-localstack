@@ -1,7 +1,11 @@
 {
   "AttributeDefinitions": [
     {
-      "AttributeName": "name",
+      "AttributeName": "id",
+      "AttributeType": "N"
+    },
+    {
+      "AttributeName": "date_added",
       "AttributeType": "S"
     }
   ],
@@ -13,7 +17,11 @@
   "KeySchema": [
     {
       "KeyType": "HASH",
-      "AttributeName": "name"
+      "AttributeName": "id"
+    },
+    {
+      "KeyType": "RANGE",
+      "AttributeName": "date_added"
     }
   ]
 }

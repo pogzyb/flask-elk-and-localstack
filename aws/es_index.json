@@ -1,0 +1,236 @@
+{
+  "logstash-scrapp-logs-2021-04-03": {
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "message_field": {
+            "path_match": "message",
+            "match_mapping_type": "string",
+            "mapping": {
+              "norms": false,
+              "type": "text"
+            }
+          }
+        },
+        {
+          "string_fields": {
+            "match": "*",
+            "match_mapping_type": "string",
+            "mapping": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "norms": false,
+              "type": "text"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "@version": {
+          "type": "keyword"
+        },
+        "agent": {
+          "properties": {
+            "ephemeral_id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            },
+            "hostname": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            },
+            "id": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            },
+            "name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            },
+            "type": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            },
+            "version": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            }
+          }
+        },
+        "dateIndex": {
+          "type": "date"
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            }
+          }
+        },
+        "event": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          },
+          "norms": false
+        },
+        "geoip": {
+          "dynamic": "true",
+          "properties": {
+            "ip": {
+              "type": "ip"
+            },
+            "latitude": {
+              "type": "half_float"
+            },
+            "location": {
+              "type": "geo_point"
+            },
+            "longitude": {
+              "type": "half_float"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            }
+          }
+        },
+        "input": {
+          "properties": {
+            "type": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              },
+              "norms": false
+            }
+          }
+        },
+        "level": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          },
+          "norms": false
+        },
+        "log": {
+          "properties": {
+            "file": {
+              "properties": {
+                "path": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  },
+                  "norms": false
+                }
+              }
+            },
+            "offset": {
+              "type": "long"
+            }
+          }
+        },
+        "logger": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          },
+          "norms": false
+        },
+        "message": {
+          "type": "text",
+          "norms": false
+        },
+        "tags": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          },
+          "norms": false
+        },
+        "timestamp": {
+          "type": "float"
+        }
+      }
+    }
+  }
+}
