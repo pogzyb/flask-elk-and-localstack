@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -49,7 +50,7 @@ func (c *Consumer) PollMessageQueue(channel chan<- *sqs.Message) {
 	for {
 		received, err := c.Sqs.ReceiveMessage(c.SqsReceiveParams)
 		if err != nil {
-			log.Fatalf("problem polling sqs: %v\n", err)
+			log.Fatalf("problem polling sqs: %v", err)
 		}
 		for _, message := range received.Messages {
 			channel <- message
@@ -60,17 +61,18 @@ func (c *Consumer) PollMessageQueue(channel chan<- *sqs.Message) {
 func (c *Consumer) HandleMessage(message *sqs.Message) {
 	item := Item{}
 	if err := json.Unmarshal([]byte(*message.Body), &item); err != nil {
-		log.Fatalf("problem unmarshaling message body: %v\n", err)
+		log.Fatalf("problem unmarshaling message body: %v", err)
 	}
-	log.Printf("Processing [%s]...\n", item.Name)
-	w := NewWikiPage(item.Name)
+	log.Printf("Processing [%s]...\n", item.Term)
+	w := NewWikiPage(item.Term)
 	item.Links = w.Links
 	item.Tags = w.Tags
 	// mimic some long background process
 	time.Sleep(time.Second * 10)
 	// end processing
-	c.UpdateItem(&item)
-	log.Printf("Processing complete! Updated [%s]\n", item.Name)
+	//c.UpdateItem(&item)
+	c.InsertItem(&item)
+	log.Printf("Processing complete! Updated [%s]\n", item.Term)
 }
 
 func (c *Consumer) DeleteMessage(message *sqs.Message) {
@@ -85,22 +87,22 @@ func (c *Consumer) DeleteMessage(message *sqs.Message) {
 	log.Printf("Deleted message [%s]\n", *message.MessageId)
 }
 
-//func (c *Consumer) InsertItem(inputItemRaw *Item) {
-//	inputItemMarshaled, err := dynamodbattribute.MarshalMap(inputItemRaw)
-//	if err != nil {
-//		log.Fatalf("Problem marshalling input-item: %s", err.Error())
-//	}
-//	inputItemReady := &dynamodb.PutItemInput{
-//		Item:      inputItemMarshaled,
-//		TableName: aws.String(c.DdbTableName),
-//	}
-//	// DO INSERT
-//	_, err = c.Ddb.PutItem(inputItemReady)
-//	if err != nil {
-//		log.Fatalf("Problem inserting item into Ddb table: %s", err.Error())
-//	}
-//	log.Printf("Success! Inserted item [%s]\n", inputItemRaw.Name)
-//}
+func (c *Consumer) InsertItem(inputItemRaw *Item) {
+	inputItemMarshaled, err := dynamodbattribute.MarshalMap(inputItemRaw)
+	if err != nil {
+		log.Fatalf("Problem marshalling input-item: %s", err.Error())
+	}
+	inputItemReady := &dynamodb.PutItemInput{
+		Item:      inputItemMarshaled,
+		TableName: aws.String(c.DdbTableName),
+	}
+	// DO INSERT
+	_, err = c.Ddb.PutItem(inputItemReady)
+	if err != nil {
+		log.Fatalf("Problem inserting item into Ddb table: %s", err.Error())
+	}
+	log.Printf("Success! Inserted item [%s]\n", inputItemRaw.Term)
+}
 
 func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 	// convert "metrics" map into DDB attribute
@@ -117,13 +119,14 @@ func (c *Consumer) UpdateItem(inputItemRaw *Item) {
 		links = append(links, lnAv)
 	}
 	// construct DDB key
+	idStr := strconv.Itoa(inputItemRaw.ID)
 	key := map[string]*dynamodb.AttributeValue{
-		"name": {
-			S: aws.String(inputItemRaw.Name),
+		"id": {
+			N: aws.String(idStr),
 		},
-		//"timestamp": {
-		//	S: aws.String(inputItemRaw.Timestamp),
-		//},
+		"date_added": {
+			S: aws.String(inputItemRaw.DateAdded),
+		},
 	}
 	// construct DDB update values
 	update := map[string]*dynamodb.AttributeValue{

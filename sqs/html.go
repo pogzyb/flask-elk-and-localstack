@@ -31,9 +31,9 @@ func getPage(term string) io.Reader {
 	wikiURL := "https://wikipedia.org/wiki/" + termUnderScored
 	response, err := http.Get(wikiURL)
 	if err != nil {
-
+		log.Printf("bad response wikipedia: %v", err)
 	}
-	log.Println("Got response status code: ", response.StatusCode)
+	//log.Println("Got response status code: ", response.StatusCode)
 	return response.Body
 }
 
@@ -66,8 +66,12 @@ func (w *WikiPage) handleStartTag(tokenizer *html.Tokenizer) {
 
 func (w *WikiPage) handleHrefAttr(tokenizer *html.Tokenizer) {
 	attr, value, more := tokenizer.TagAttr()
-	if string(attr) == "href" {
-		w.Links = append(w.Links, string(value))
+	// check for href and if href starts with "/" or "http"
+	attrStr := string(attr)
+	if attrStr == "href" {
+		if strings.HasPrefix(attrStr, "/") || strings.HasPrefix(attrStr, "http") {
+			w.Links = append(w.Links, string(value))
+		}
 	}
 	if more {
 		w.handleHrefAttr(tokenizer)

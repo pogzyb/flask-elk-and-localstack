@@ -2,11 +2,13 @@ package main
 
 // an incoming item from the queue
 type Item struct {
-	Timestamp string           `json:"timestamp"`
-	Name      string           `json:"name"`
-	Standing  string           `json:"standing"`
-	Links     []string         `json:"links,omitempty"`
-	Tags   map[string]int64    `json:"tags,omitempty"`
+	ID          int              `json:"id"`
+	DateAdded   string           `json:"date_added"`
+	DateUpdated string           `json:"date_updated"`
+	Term        string           `json:"term"`
+	Standing    string           `json:"standing,omitempty"`
+	Links       []string         `json:"links,omitempty"`
+	Tags        map[string]int64 `json:"tags,omitempty"`
 }
 
 // contains fields to be updated
