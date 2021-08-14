@@ -1,32 +1,30 @@
 import os
 from typing import Dict, List, Any
-from threading import RLock
+# from threading import Lock
 
 from structlog import get_logger
 
 from . import get_client
-
 
 logger = get_logger(__name__)
 
 
 def insert_record(item: Dict[str, Any]) -> None:
     ddb = get_client('dynamodb')
-    with RLock():
-        try:
-            ddb.put_item(
-                TableName=os.getenv('AWS_DDB_TABLE_NAME'),
-                Item={
-                    'name': {'S': item.get('name')},
-                    'timestamp': {'S': item.get('timestamp')},
-                    'standing': {'S': item.get('standing')},
-                    'links': {'L': item.get('links')},
-                    'tags': {'M': item.get('tags')}
-                }
-            )
-            logger.info(f'Success! Inserted item base.')
-        except Exception:
-            logger.exception(f'could not put_item:')
+    try:
+        ddb.put_item(
+            TableName=os.getenv('AWS_DDB_TABLE_NAME'),
+            Item={
+                'id': {'N': item.get('id')},
+                'term': {'S': item.get('term')},
+                'date_updated': {'S': item.get('date_updated')},
+                'date_added': {'S': item.get('date_added')},
+                'standing': {'S': 'pending'}
+            }
+        )
+        logger.info(f'Success! Inserted item base.')
+    except:
+        logger.exception('could not put_item')
 
 
 def get_all_records() -> Dict[str, Any]:
@@ -40,7 +38,7 @@ def get_record(term: str) -> Dict[str, Any]:
     response = ddb.get_item(
         TableName=os.getenv('AWS_DDB_TABLE_NAME'),
         Key={
-            'name': {
+            'term': {
                 'S': term
             }
         }
@@ -66,11 +64,9 @@ def format_record(items_list: List[Dict[str, Dict]]) -> List[Dict[str, str]]:
     formatted_items_list = []
     for item in items_list:
         formatted_item_dict = {
-            'name': item.get('name').get('S'),
-            'standing': item.get('standing').get('S'),
-            'timestamp': item.get('timestamp').get('S'),
-            'links': extract_from_list(item.get('links')),
-            'tags': extract_from_map(item.get('tags'))
+            'term': item.get('term').get('S'),
+            'date_updated': item.get('date_updated').get('S'),
+            'date_added': item.get('date_added').get('S'),
         }
         formatted_items_list.append(formatted_item_dict)
     return formatted_items_list

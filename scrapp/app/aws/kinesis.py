@@ -12,7 +12,7 @@ STREAM_NAME = os.getenv('AWS_KINESIS_STREAM_NAME')
 PARTITION_KEY = os.getenv('AWS_KINESIS_PARTITION_KEY')
 
 
-def put_to_stream(data: Dict[str, Any]) -> None:
+def put(data: Dict[str, Any]) -> None:
     client = get_client('kinesis')
     client.put_record(
         StreamName=STREAM_NAME,

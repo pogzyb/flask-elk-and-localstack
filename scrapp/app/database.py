@@ -1,8 +1,20 @@
-from structlog import get_logger
+from datetime import datetime
+from typing import List
+
 from flask_sqlalchemy import SQLAlchemy
+from flask import current_app
+
+from .search import search
 
 db = SQLAlchemy()
-logger = get_logger(__name__)
+
+
+class TimeMixin:
+    """Generic Timestamp Mixin"""
+    __table_args__ = {'extend_existing': True}
+
+    date_added = db.Column(db.DateTime, default=datetime.utcnow())
+    date_updated = db.Column(db.DateTime, default=datetime.utcnow())
 
 
 class CRUDMixin:
@@ -17,6 +29,11 @@ class CRUDMixin:
         return obj
 
     @classmethod
+    def get_by_ids(cls, ids: List[int]):
+        objs = cls.query.filter(cls.id.in_(ids)).all()
+        return objs
+
+    @classmethod
     def create(cls, **kwargs):
         obj = cls(**kwargs)
         return obj.save()
@@ -25,7 +42,6 @@ class CRUDMixin:
         for attr, value in kwargs.items():
             if getattr(self, attr):
                 setattr(self, attr, value)
-
         if commit:
             return self.save()
         else:
@@ -43,5 +59,13 @@ class CRUDMixin:
             db.session.commit()
 
 
-class DataTable:
-    pass
+class SearchMixin(CRUDMixin):
+    """SQLA Model Interface for Search"""
+    @classmethod
+    def from_search(cls, index_name: str, query_text: str, size: int):
+        if not current_app.elasticsearch:
+            return None
+        else:
+            obj_ids, num = search(index_name, query_text, size)
+            objs = cls.get_by_ids(obj_ids)
+            return objs

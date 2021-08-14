@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Begin page content -->
+<main role="main" class="container">
+    <div class="jumbotron">
+        {% for result in results %}
+        <p>{{ result.term }}</p>
+        {% endfor %}
+    </div>
+</main>
+
+<!-- Begin footer -->
+{% include "footer.html" %}
+<!-- Begin core js -->
+{% include "core_js.html" %}
+<!-- js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/poll.js') }}"></script>
+<!-- End -->
+{% endblock %}

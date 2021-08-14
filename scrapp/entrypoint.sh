@@ -19,5 +19,6 @@ if [[ $debug == "0" ]]; then
     "app:create_app('production')"
 else
   echo "Running in non-production mode."
+  flask auth create-admin
   python ${APP_HOME}/main.py
 fi

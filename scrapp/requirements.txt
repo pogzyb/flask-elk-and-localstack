@@ -5,6 +5,10 @@ Flask-WTF==0.14.3
 Flask-SocketIO==5.0.1
 Flask-Caching==1.9.0
 Flask-Migrate==2.5.3
+Flask-Assets==2.0
+Flask-Marshmallow==0.14.0
+marshmallow-sqlalchemy==0.26.1
+cssmin==0.2.0
 email-validator==1.1.2
 PyJWT==2.0.0
 gevent==20.9.0
@@ -17,3 +21,4 @@ redis==3.5.3
 python-json-logger==2.0.1
 structlog==21.1.0
 colorama==0.4.4
+elasticsearch==7.11.0

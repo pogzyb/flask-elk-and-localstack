@@ -1,5 +1,9 @@
 {% macro display_nav_options(user) %}
     <div class="collapse navbar-collapse" id="navbarsExample07XL">
+        <form method="get" action="term/search" class="d-flex">
+            <input name="term" id="searchForm" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-info" type="submit"><i class="fas fa-search"></i></button>
+        </form>
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             {% if user.is_authenticated %}
             <li class="nav-item dropdown">

@@ -21,7 +21,7 @@ def load_user(_id: str) -> int:
     return User.query.get(int(_id))
 
 
-class Role(db.Model):
+class Role(CRUDMixin, db.Model):
     """
     Role table: stores information about roles, which users can be tied to users
     """
@@ -67,7 +67,10 @@ class User(CRUDMixin, UserMixin, db.Model):
 
     def generate_token(self, key: str, expires: int = 600) -> str:
         salt = os.getenv('APP_SECRET_KEY')
-        token = jwt.encode({key: self.id, 'expires': time() + expires}, salt, algorithm='HS256')
+        token = jwt.encode(
+            {key: {'id': self.id, 'roles': self.roles}, 'expires': time() + expires},
+            salt,
+            algorithm='HS256')
         return token
 
     @staticmethod

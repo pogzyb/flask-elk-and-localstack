@@ -22,19 +22,18 @@ from .forms import (
     CompleteResetPasswordForm
 )
 
-
 logger = get_logger(__name__)
 
 
 class AuthFlashMessages:
-    start_verify_account    = ('Welcome! Check your email to verify your account.', 'info'),
-    end_verify_account      = ('Awesome! Your account is now verified and you\'re all set.', 'success'),
-    invalid_user            = ('Uh oh! The email or password you entered wasn\'t valid.', 'danger'),
-    start_reset_password    = ('Sending reset instructions to that email address!', 'info'),
-    end_reset_password      = ('Success! Your password was updated.', 'success'),
-    resend_verify_account   = ('Success! Re-sent the verification email.', 'success'),
-    expired_token           = ('Oops! That token expired. Try again.', 'warning'),
-    invalid_token           = ('The token you provided was not valid.', 'info')
+    start_verify_account = ('Welcome! Check your email to verify your account.', 'info'),
+    end_verify_account = ('Awesome! Your account is now verified and you\'re all set.', 'success'),
+    invalid_user = ('Uh oh! The email or password you entered wasn\'t valid.', 'danger'),
+    start_reset_password = ('Sending reset instructions to that email address!', 'info'),
+    end_reset_password = ('Success! Your password was updated.', 'success'),
+    resend_verify_account = ('Success! Re-sent the verification email.', 'success'),
+    expired_token = ('Oops! That token expired. Try again.', 'warning'),
+    invalid_token = ('The token you provided was not valid.', 'info')
 
 
 @auth.route('/signup', methods=['GET', 'POST'])

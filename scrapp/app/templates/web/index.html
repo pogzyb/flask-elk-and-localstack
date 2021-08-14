@@ -10,7 +10,7 @@
         <h1 class="mt-5">Enter Anything!</h1>
         <p class="lead">Quickly pull metrics, references, images, and much more from any Wikipedia page.</p>
         <p>After submitting, the term and scraping status will appear in the table.</p>
-        <form method="post" action="/scrape">
+        <form method="post" action="/term/scrape">
             <div class="form-group">
                 <!--<label for="search-term"></label>-->
                 <input type="text" class="form-control bg-light" id="search-term" name="search-term" placeholder="Llamas">
@@ -42,6 +42,6 @@
 <!-- Begin footer -->
 {% include "footer.html" %}
 {% include "core_js.html" %}
-<script src="{{ url_for("static", filename="js/table.js") }}"></script>
+<script src="{{ url_for('static', filename='js/table.js') }}"></script>
 {% endblock %}
 

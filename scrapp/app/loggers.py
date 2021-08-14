@@ -1,6 +1,5 @@
 import os
 import logging
-import re
 
 import structlog
 from gunicorn import glogging
@@ -52,6 +51,11 @@ class LoggerConfig:
                     '()': structlog.stdlib.ProcessorFormatter,
                     'processor': structlog.processors.JSONRenderer(),
                     'foreign_pre_chain': self.preprocessor_chain,
+                },
+                'console': {
+                    '()': structlog.stdlib.ProcessorFormatter,
+                    'processor': structlog.dev.ConsoleRenderer(colors=True),
+                    'foreign_pre_chain': self.preprocessor_chain,
                 }
             },
             'handlers': {
@@ -65,7 +69,7 @@ class LoggerConfig:
                 },
                 'default': {
                     'level': 'INFO',
-                    'formatter': 'json',
+                    'formatter': 'console',
                     'class': 'logging.StreamHandler',
                     'stream': 'ext://sys.stdout'
                 },
@@ -107,6 +111,10 @@ class GunicornLogger(glogging.Logger):
         self.error_log.setLevel(logging.INFO)
         self.cfg = cfg
 
+    def log_request(self):
+        if '101' not in str(self.status):
+            self.access_log.info(self.format_request())
+
     def access(self, resp, req, environ, request_time) -> None:
         """
         "gunicorn.access" logs are normally parsed here; however, the use
@@ -119,4 +127,4 @@ class GunicornLogger(glogging.Logger):
         :param request_time:
         :return:
         """
-        pass
+        ...

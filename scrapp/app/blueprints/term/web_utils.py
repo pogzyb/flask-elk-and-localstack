@@ -6,7 +6,6 @@ class FlashMessages:
 
 
 class ScrapeStatus(str, Enum):
-    PENDING     = 'pending'
-    COMPLETE    = 'complete'
-    TIMEOUT     = 'timeout'
-
+    PENDING = 'pending'
+    COMPLETE = 'complete'
+    TIMEOUT = 'timeout'
